@@ -3,11 +3,11 @@ package com.comet.opik.api.resources.utils.resources;
 import com.comet.opik.api.ExperimentItem;
 import com.comet.opik.api.FeedbackScore;
 import com.comet.opik.api.resources.utils.CommentAssertionUtils;
+import com.comet.opik.api.resources.utils.FieldValidator;
 import com.comet.opik.api.resources.utils.StatsUtils;
 
 import java.math.BigDecimal;
 import java.util.List;
-import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -28,8 +28,12 @@ public class ExperimentTestAssertions {
                 .ignoringFields(ignoringFields)
                 .isEqualTo(expected);
 
-        if (ignoringFields != null && Set.of(ignoringFields).contains("traceId")) {
-            assertThat(actual.getFirst().traceId()).isNotNull();
+        if (ignoringFields != null) {
+            FieldValidator.builder()
+                    .allowEmptyLists(true)
+                    .allowNullContainers(true)
+                    .build()
+                    .validateFields(actual, ignoringFields);
         }
     }
 
