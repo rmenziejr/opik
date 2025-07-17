@@ -294,10 +294,10 @@ class RawSpansClient:
     def create_span(
         self,
         *,
-        trace_id: str,
         start_time: dt.datetime,
         id: typing.Optional[str] = OMIT,
         project_name: typing.Optional[str] = OMIT,
+        trace_id: typing.Optional[str] = OMIT,
         parent_span_id: typing.Optional[str] = OMIT,
         name: typing.Optional[str] = OMIT,
         type: typing.Optional[SpanWriteType] = OMIT,
@@ -320,14 +320,14 @@ class RawSpansClient:
 
         Parameters
         ----------
-        trace_id : str
-
         start_time : dt.datetime
 
         id : typing.Optional[str]
 
         project_name : typing.Optional[str]
             If null, the default project is used
+
+        trace_id : typing.Optional[str]
 
         parent_span_id : typing.Optional[str]
 
@@ -1500,10 +1500,10 @@ class AsyncRawSpansClient:
     async def create_span(
         self,
         *,
-        trace_id: str,
         start_time: dt.datetime,
         id: typing.Optional[str] = OMIT,
         project_name: typing.Optional[str] = OMIT,
+        trace_id: typing.Optional[str] = OMIT,
         parent_span_id: typing.Optional[str] = OMIT,
         name: typing.Optional[str] = OMIT,
         type: typing.Optional[SpanWriteType] = OMIT,
@@ -1526,14 +1526,14 @@ class AsyncRawSpansClient:
 
         Parameters
         ----------
-        trace_id : str
-
         start_time : dt.datetime
 
         id : typing.Optional[str]
 
         project_name : typing.Optional[str]
             If null, the default project is used
+
+        trace_id : typing.Optional[str]
 
         parent_span_id : typing.Optional[str]
 

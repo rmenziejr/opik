@@ -1,5 +1,6 @@
 from typing import Any, Optional, Union
 import pydantic
+import asyncstdlib as a
 
 from opik.evaluation.metrics import base_metric, score_result
 from opik.evaluation.models import base_model, models_factory
@@ -70,6 +71,14 @@ class GEval(base_metric.BaseMetric):
             self._chain_of_thought_response = await self._model.agenerate_string(input=prompt)
 
         return self._chain_of_thought_response
+
+    @a.cached_property
+    async def allm_chain_of_thought(self) -> str:
+        prompt = template.G_EVAL_COT_TEMPLATE.format(
+            task_introduction=self.task_introduction,
+            evaluation_criteria=self.evaluation_criteria,
+        )
+        return await self._model.agenerate_string(input=prompt)
 
     def _init_model(
         self, model: Optional[Union[str, base_model.OpikBaseModel]]
@@ -146,6 +155,7 @@ class GEval(base_metric.BaseMetric):
         llm_query = template.G_EVAL_QUERY_TEMPLATE.format(
             task_introduction=self.task_introduction,
             evaluation_criteria=self.evaluation_criteria,
+
             chain_of_thought=await self.allm_chain_of_thought(),
             input=output,
         )
