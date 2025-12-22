@@ -23,11 +23,11 @@ public class AuthModule extends DropwizardAwareModule<OpikConfiguration> {
     public BasicAuthService basicAuthService(
             @Config("authentication") AuthenticationConfig config,
             @NonNull Provider<RequestContext> requestContext) {
-        
+
         if (config.isEnabled() && "basic".equalsIgnoreCase(config.getMode())) {
             return new BasicAuthService(config.getBasicAuthUsername(), config.getBasicAuthPassword(), requestContext);
         }
-        
+
         // Return a dummy instance if basic auth is not enabled
         return new BasicAuthService("", "", requestContext);
     }
@@ -50,7 +50,7 @@ public class AuthModule extends DropwizardAwareModule<OpikConfiguration> {
                     "The property authentication.basicAuthUsername must not be blank when basic auth is enabled");
             Preconditions.checkArgument(StringUtils.isNotBlank(config.getBasicAuthPassword()),
                     "The property authentication.basicAuthPassword must not be blank when basic auth is enabled");
-            
+
             return basicAuthService;
         }
 

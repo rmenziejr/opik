@@ -72,7 +72,8 @@ public class AuthenticationResource {
             @ApiResponse(responseCode = "200", description = "Login successful"),
             @ApiResponse(responseCode = "401", description = "Invalid credentials", content = @Content(schema = @Schema(implementation = ErrorMessage.class)))
     })
-    public Response login(@Valid @RequestBody(content = @Content(schema = @Schema(implementation = LoginRequest.class))) LoginRequest request) {
+    public Response login(
+            @Valid @RequestBody(content = @Content(schema = @Schema(implementation = LoginRequest.class))) LoginRequest request) {
         if (!authConfig.isEnabled() || !"basic".equalsIgnoreCase(authConfig.getMode())) {
             log.warn("Basic authentication is not enabled");
             return Response.status(Response.Status.NOT_FOUND).build();
@@ -83,13 +84,16 @@ public class AuthenticationResource {
         Optional<String> sessionToken = basicAuthService.get().login(request.username(), request.password());
 
         if (sessionToken.isPresent()) {
-            NewCookie cookie = new NewCookie.Builder(SESSION_COOKIE)
-                    .value(sessionToken.get())
-                    .path("/")
-                    .maxAge(86400) // 24 hours
-                    .httpOnly(true)
-                    .secure(false) // Set to true in production with HTTPS
-                    .build();
+            NewCookie cookie = new NewCookie(
+                    SESSION_COOKIE,
+                    sessionToken.get(),
+                    "/",
+                    null,
+                    null,
+                    86400, // 24 hours
+                    false, // secure
+                    true // httpOnly
+            );
 
             return Response.ok(new LoginResponse(true, "Login successful", request.username()))
                     .cookie(cookie)
@@ -118,12 +122,16 @@ public class AuthenticationResource {
         }
 
         // Clear the session cookie
-        NewCookie expiredCookie = new NewCookie.Builder(SESSION_COOKIE)
-                .value("")
-                .path("/")
-                .maxAge(0)
-                .httpOnly(true)
-                .build();
+        NewCookie expiredCookie = new NewCookie(
+                SESSION_COOKIE,
+                "",
+                "/",
+                null,
+                null,
+                0, // max age
+                false, // secure
+                true // httpOnly
+        );
 
         return Response.ok(new LogoutResponse(true, "Logout successful"))
                 .cookie(expiredCookie)

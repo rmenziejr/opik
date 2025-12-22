@@ -25,7 +25,7 @@ import static com.comet.opik.infrastructure.auth.RequestContext.WORKSPACE_HEADER
  */
 @RequiredArgsConstructor
 @Slf4j
-class BasicAuthService implements AuthService {
+public class BasicAuthService implements AuthService {
 
     private static final String MISSING_CREDENTIALS = "Missing authentication credentials";
     private static final String INVALID_CREDENTIALS = "Invalid username or password";
@@ -122,7 +122,7 @@ class BasicAuthService implements AuthService {
             String base64Credentials = authHeader.substring("Basic ".length()).trim();
             String credentials = new String(Base64.getDecoder().decode(base64Credentials), StandardCharsets.UTF_8);
             String[] parts = credentials.split(":", 2);
-            
+
             if (parts.length == 2) {
                 String username = parts[0];
                 String password = parts[1];
