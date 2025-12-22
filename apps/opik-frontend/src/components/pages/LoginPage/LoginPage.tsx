@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
+import axios from "axios";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -7,6 +8,7 @@ import { useToast } from "@/components/ui/use-toast";
 import Logo from "@/plugins/comet/Logo";
 import useAppStore from "@/store/AppStore";
 import { DEFAULT_WORKSPACE_NAME } from "@/constants/user";
+import { BASE_API_URL } from "@/api/api";
 
 const LoginPage: React.FC = () => {
   const [username, setUsername] = useState("");
@@ -20,18 +22,15 @@ const LoginPage: React.FC = () => {
     setLoading(true);
 
     try {
-      const response = await fetch("/api/v1/session/auth/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ username, password }),
-        credentials: "include",
-      });
+      const response = await axios.post(
+        `${BASE_API_URL}/v1/session/auth/login`,
+        { username, password },
+        { withCredentials: true }
+      );
 
-      const data = await response.json();
+      const data = response.data;
 
-      if (response.ok && data.success) {
+      if (data.success) {
         toast({
           title: "Login successful",
           description: "Welcome back!",

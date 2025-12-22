@@ -13,6 +13,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
 import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.SecureRandom;
 import java.util.Base64;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
@@ -22,6 +24,11 @@ import static com.comet.opik.infrastructure.auth.RequestContext.WORKSPACE_HEADER
 /**
  * Basic authentication service that validates username and password from environment variables.
  * This provides a simple authentication mechanism for self-hosted installations.
+ *
+ * IMPORTANT LIMITATIONS:
+ * - Sessions are stored in-memory and will be lost on service restart
+ * - Designed for single-user (admin) scenarios
+ * - For production multi-user scenarios, consider using the cloud version or implementing robust auth
  */
 @RequiredArgsConstructor
 @Slf4j
@@ -91,8 +98,16 @@ public class BasicAuthService implements AuthService {
      * @return Session token if authentication succeeds
      */
     public Optional<String> login(String username, String password) {
-        if (adminUsername.equals(username) && adminPassword.equals(password)) {
-            String sessionToken = java.util.UUID.randomUUID().toString();
+        // Use constant-time comparison to prevent timing attacks
+        boolean usernameMatch = MessageDigest.isEqual(
+                adminUsername.getBytes(StandardCharsets.UTF_8),
+                username.getBytes(StandardCharsets.UTF_8));
+        boolean passwordMatch = MessageDigest.isEqual(
+                adminPassword.getBytes(StandardCharsets.UTF_8),
+                password.getBytes(StandardCharsets.UTF_8));
+
+        if (usernameMatch && passwordMatch) {
+            String sessionToken = generateSecureToken();
             sessions.put(sessionToken, username);
             log.info("User logged in successfully: {}", username);
             return Optional.of(sessionToken);
@@ -110,6 +125,17 @@ public class BasicAuthService implements AuthService {
             sessions.remove(sessionToken);
             log.info("User logged out");
         }
+    }
+
+    /**
+     * Generates a cryptographically secure random session token
+     * @return A secure random token encoded as base64
+     */
+    private String generateSecureToken() {
+        SecureRandom secureRandom = new SecureRandom();
+        byte[] tokenBytes = new byte[32]; // 256 bits of entropy
+        secureRandom.nextBytes(tokenBytes);
+        return Base64.getUrlEncoder().withoutPadding().encodeToString(tokenBytes);
     }
 
     /**

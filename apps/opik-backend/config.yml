@@ -152,8 +152,9 @@ authentication:
   # Default: admin
   # Description: Admin username for basic authentication
   basicAuthUsername: ${BASIC_AUTH_USERNAME:-admin}
-  # Default: (empty, must be set via environment variable)
-  # Description: Admin password for basic authentication
+  # Default: (empty, MUST be set via environment variable for security)
+  # Description: Admin password for basic authentication. REQUIRED when AUTH_ENABLED=true and AUTH_MODE=basic
+  # WARNING: Leaving this empty will prevent authentication from working correctly
   basicAuthPassword: ${BASIC_AUTH_PASSWORD:-}
 
 # https://www.dropwizard.io/en/stable/manual/configuration.html#servers

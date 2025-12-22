@@ -1,5 +1,5 @@
 import React from "react";
-import { Navigate } from "@tanstack/react-router";
+import { Navigate, useNavigate } from "@tanstack/react-router";
 import useAppStore from "@/store/AppStore";
 import { DEFAULT_WORKSPACE_NAME } from "@/constants/user";
 import { useWorkspaceNameFromURL } from "@/hooks/useWorkspaceNameFromURL";
@@ -15,6 +15,7 @@ const WorkspacePreloader: React.FunctionComponent<WorkspacePreloaderProps> = ({
 }) => {
   const { data: userInfo, isLoading } = useUserInfo();
   const workspaceNameFromURL = useWorkspaceNameFromURL();
+  const navigate = useNavigate();
 
   // Show loader while checking authentication
   if (isLoading) {
@@ -23,8 +24,11 @@ const WorkspacePreloader: React.FunctionComponent<WorkspacePreloaderProps> = ({
 
   // If not logged in, redirect to login page
   if (userInfo && !userInfo.loggedIn) {
-    window.location.href = "/login";
-    return null;
+    // Use navigate for client-side routing
+    React.useEffect(() => {
+      navigate({ to: "/login" });
+    }, [navigate]);
+    return <Loader />;
   }
 
   useAppStore.getState().setActiveWorkspaceName(DEFAULT_WORKSPACE_NAME);
