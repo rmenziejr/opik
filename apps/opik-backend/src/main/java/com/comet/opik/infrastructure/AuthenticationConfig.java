@@ -19,4 +19,13 @@ public class AuthenticationConfig {
 
     @Valid @JsonProperty
     private UrlConfig reactService;
+
+    @Valid @JsonProperty
+    private String mode = "remote"; // "remote" or "basic"
+
+    @Valid @JsonProperty
+    private String basicAuthUsername;
+
+    @Valid @JsonProperty
+    private String basicAuthPassword;
 }
