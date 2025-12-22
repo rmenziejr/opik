@@ -138,13 +138,23 @@ authentication:
   # Default: false
   # Description: Whether or not to enable authentication
   enabled: ${AUTH_ENABLED:-false}
+  # Default: remote
+  # Description: Authentication mode. Supported values: "remote" (for Comet cloud) or "basic" (username/password)
+  mode: ${AUTH_MODE:-remote}
   # Default: 5
   # Description: API key resolution cache TTL (seconds). Setting this value to 0 means no caching.
   apiKeyResolutionCacheTTLInSec: ${AUTH_API_KEY_RESOLUTION_CACHE_TTL_IN_SEC:-5}
   # Default: http://react-svc:8080
-  # Description: Configures base url for React service, used for user management and authentication
+  # Description: Configures base url for React service, used for user management and authentication (only used in "remote" mode)
   reactService:
     url: ${REACT_SERVICE_URL:-http://react-svc:8080}
+  # Basic authentication credentials (only used when mode is "basic")
+  # Default: admin
+  # Description: Admin username for basic authentication
+  basicAuthUsername: ${BASIC_AUTH_USERNAME:-admin}
+  # Default: (empty, must be set via environment variable)
+  # Description: Admin password for basic authentication
+  basicAuthPassword: ${BASIC_AUTH_PASSWORD:-}
 
 # https://www.dropwizard.io/en/stable/manual/configuration.html#servers
 server:
