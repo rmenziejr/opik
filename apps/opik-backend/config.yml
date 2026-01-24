@@ -156,6 +156,11 @@ authentication:
   # Description: Admin password for basic authentication. REQUIRED when AUTH_ENABLED=true and AUTH_MODE=basic
   # WARNING: Leaving this empty will prevent authentication from working correctly
   basicAuthPassword: ${BASIC_AUTH_PASSWORD:-}
+  # Default: (empty, optional)
+  # Description: API key for Bearer token authentication. Use this for programmatic API access (HIPAA compliant).
+  # When set, allows requests with "Authorization: Bearer <api-key>" header.
+  # Recommended for SDK integration, CI/CD pipelines, and automated workflows.
+  basicAuthApiKey: ${BASIC_AUTH_API_KEY:-}
 
 # https://www.dropwizard.io/en/stable/manual/configuration.html#servers
 server:

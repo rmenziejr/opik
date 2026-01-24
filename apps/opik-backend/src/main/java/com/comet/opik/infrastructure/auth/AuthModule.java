@@ -25,11 +25,15 @@ public class AuthModule extends DropwizardAwareModule<OpikConfiguration> {
             @NonNull Provider<RequestContext> requestContext) {
 
         if (config.isEnabled() && "basic".equalsIgnoreCase(config.getMode())) {
-            return new BasicAuthService(config.getBasicAuthUsername(), config.getBasicAuthPassword(), requestContext);
+            return new BasicAuthService(
+                    config.getBasicAuthUsername(),
+                    config.getBasicAuthPassword(),
+                    config.getBasicAuthApiKey(),
+                    requestContext);
         }
 
         // Return a dummy instance if basic auth is not enabled
-        return new BasicAuthService("", "", requestContext);
+        return new BasicAuthService("", "", null, requestContext);
     }
 
     @Provides

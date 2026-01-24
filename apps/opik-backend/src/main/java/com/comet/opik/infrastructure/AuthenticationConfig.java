@@ -28,4 +28,7 @@ public class AuthenticationConfig {
 
     @Valid @JsonProperty
     private String basicAuthPassword;
+
+    @Valid @JsonProperty
+    private String basicAuthApiKey;
 }
