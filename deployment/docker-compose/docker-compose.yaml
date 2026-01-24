@@ -152,6 +152,11 @@ services:
       PYTHON_EVALUATOR_URL: http://python-backend:8000
       TOGGLE_GUARDRAILS_ENABLED: ${TOGGLE_GUARDRAILS_ENABLED:-"false"}
       TOGGLE_TRACE_THREAD_PYTHON_EVALUATOR_ENABLED: ${TOGGLE_TRACE_THREAD_PYTHON_EVALUATOR_ENABLED:-"true"}
+      # Basic authentication configuration
+      AUTH_ENABLED: ${AUTH_ENABLED:-false}
+      AUTH_MODE: ${AUTH_MODE:-basic}
+      BASIC_AUTH_USERNAME: ${BASIC_AUTH_USERNAME:-admin}
+      BASIC_AUTH_PASSWORD: ${BASIC_AUTH_PASSWORD:-}
     ports:
       - "3003" # OpenAPI specification port
     healthcheck:

@@ -25,6 +25,11 @@ public class AuthFilter implements ContainerRequestFilter {
     private final AuthService authService;
     private final jakarta.inject.Provider<RequestContext> requestContext;
 
+    // Public auth endpoints that don't require session authentication
+    private static final Pattern PUBLIC_SESSION_ENDPOINTS = Pattern.compile(
+            "/v1/session/auth/(login|logout)$"
+    );
+
     @Override
     public void filter(ContainerRequestContext context) throws IOException {
 
@@ -33,14 +38,18 @@ public class AuthFilter implements ContainerRequestFilter {
         var sessionToken = headers.getCookies().get(RequestContext.SESSION_COOKIE);
 
         UriInfo uriInfo = context.getUriInfo();
+        String path = uriInfo.getRequestUri().getPath();
 
-        if (Pattern.matches("/v1/private/.*", uriInfo.getRequestUri().getPath())) {
+        if (Pattern.matches("/v1/private/.*", path)) {
             authService.authenticate(headers, sessionToken, ContextInfoHolder.builder()
                     .uriInfo(uriInfo)
                     .method(context.getMethod())
                     .build());
-        } else if (Pattern.matches("/v1/session/.*", uriInfo.getRequestUri().getPath())) {
-            authService.authenticateSession(sessionToken);
+        } else if (Pattern.matches("/v1/session/.*", path)) {
+            // Skip authentication for login and logout endpoints
+            if (!PUBLIC_SESSION_ENDPOINTS.matcher(path).matches()) {
+                authService.authenticateSession(sessionToken);
+            }
         }
 
         requestContext.get().setHeaders(context.getHeaders());
