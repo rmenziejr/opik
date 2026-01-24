@@ -28,7 +28,8 @@ import static com.comet.opik.infrastructure.auth.RequestContext.WORKSPACE_HEADER
  * Supports multiple authentication methods:
  * - Session cookies (from UI login)
  * - HTTP Basic Auth header (username:password)
- * - Bearer token (API key for programmatic access - HIPAA compliant)
+ * - Bearer token (Authorization: Bearer api-key - HIPAA compliant)
+ * - Raw API key (Authorization: api-key - for Opik SDK compatibility)
  *
  * IMPORTANT LIMITATIONS:
  * - Sessions are stored in-memory and will be lost on service restart
@@ -75,10 +76,10 @@ public class BasicAuthService implements AuthService {
                 return;
             }
 
-            // Try Authorization header (Bearer token or Basic auth)
+            // Try Authorization header (Bearer token, raw API key, or Basic auth)
             String authHeader = headers.getHeaderString(HttpHeaders.AUTHORIZATION);
             if (authHeader != null) {
-                // Try Bearer token (API key) first
+                // Try Bearer token (API key with "Bearer " prefix)
                 if (authHeader.startsWith("Bearer ")) {
                     if (validateBearerToken(authHeader)) {
                         requestContext.get().setUserName(adminUsername);
@@ -99,6 +100,16 @@ public class BasicAuthService implements AuthService {
                         requestContext.get().setApiKey("basic_auth");
                         return;
                     }
+                    throw new ClientErrorException(INVALID_CREDENTIALS, Response.Status.UNAUTHORIZED);
+                }
+
+                // Try raw API key (for Opik SDK compatibility - sends key without "Bearer " prefix)
+                if (validateRawApiKey(authHeader)) {
+                    requestContext.get().setUserName(adminUsername);
+                    requestContext.get().setWorkspaceId(ProjectService.DEFAULT_WORKSPACE_ID);
+                    requestContext.get().setWorkspaceName(ProjectService.DEFAULT_WORKSPACE_NAME);
+                    requestContext.get().setApiKey(apiKey);
+                    return;
                 }
             }
 
@@ -210,6 +221,30 @@ public class BasicAuthService implements AuthService {
                     token.getBytes(StandardCharsets.UTF_8));
         } catch (Exception e) {
             log.warn("Failed to parse bearer token", e);
+        }
+        return false;
+    }
+
+    /**
+     * Validates raw API key authentication (for Opik SDK compatibility)
+     * The SDK sends the API key directly in the Authorization header without "Bearer " prefix
+     * Uses constant-time comparison to prevent timing attacks
+     * @param authHeader Authorization header value (raw API key)
+     * @return true if the API key is valid
+     */
+    private boolean validateRawApiKey(String authHeader) {
+        if (StringUtils.isBlank(apiKey)) {
+            return false;
+        }
+
+        try {
+            String token = authHeader.trim();
+            // Use constant-time comparison to prevent timing attacks
+            return MessageDigest.isEqual(
+                    apiKey.getBytes(StandardCharsets.UTF_8),
+                    token.getBytes(StandardCharsets.UTF_8));
+        } catch (Exception e) {
+            log.warn("Failed to validate raw API key", e);
         }
         return false;
     }
